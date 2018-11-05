@@ -1,0 +1,32 @@
+{
+  "Front Face": {
+    "color": [1, 0, 0],
+    "specular": "mini_body_spec.png",
+    "diffuse": "mini_body_diffuse.png"
+  },
+  "Back Face": {
+    "color": [0, 1, 0],
+    "specular": "mini_body_spec.png",
+    "diffuse": "mini_body_diffuse.png"
+  },
+  "Top Face": {
+    "color": [0, 0, 1],
+    "specular": "mini_body_spec.png",
+    "diffuse": "mini_body_diffuse.png"
+  },
+  "Bottom Face": {
+    "color": [1, 0, 1],
+    "specular": "mini_body_spec.png",
+    "diffuse": "mini_body_diffuse.png"
+  },
+  "Right Face": {
+    "color": [0, 1.0, 1.0],
+    "specular": "mini_body_spec.png",
+    "diffuse": "mini_body_diffuse.png"
+  },
+  "Left Face": {
+    "color": [1.0, 1.0, 1.0],
+    "specular": "mini_body_spec.png",
+    "diffuse": "mini_body_diffuse.png"
+  }
+}
