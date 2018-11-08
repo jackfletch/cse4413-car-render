@@ -32,15 +32,80 @@ const INT8_SIZE = Int8Array.BYTES_PER_ELEMENT;
 const INT16_SIZE = Int16Array.BYTES_PER_ELEMENT;
 const FLOAT32_SIZE = Float32Array.BYTES_PER_ELEMENT;
 
-let xdisplacement = 0.0;
-let ydisplacement = 0.0;
-let zdisplacement = 0.0;
+let i = true;
 
 let theta = -45.0;
-let useOrtho = true;
+let useOrtho = false;
+let isSheared = false;
 let modelMatrix = mat4.create();
+let positionOffset = vec3.fromValues(0, 0, -6);
+// TODO shearMatrix
+let shearMatrix = mat4.create();
+let viewMatrix = mat4.create();
 
-// Set up four Fetch calls for the resources and process accordingly. 
+let shearFactor = 0;
+
+function toRadians(angle) {
+    return angle * (Math.PI / 180);
+}
+function rotateX(matrix, angle) {
+    let rad = toRadians(angle);
+    // return mat4.fromXRotation(matrix, rad);
+    let rotateMat = mat4.fromValues(
+        1, 0, 0, 0,
+        0, Math.cos(rad), Math.sin(rad), 0,
+        0, -Math.sin(rad), Math.cos(rad), 0,
+        0, 0, 0, 1);
+    return mat4.multiply(matrix, matrix, rotateMat);
+}
+function rotateY(matrix, angle) {
+    let rad = toRadians(angle);
+    // return mat4.fromYRotation(matrix, rad);
+    let rotateMat = mat4.fromValues(
+        Math.cos(rad), 0, -Math.sin(rad), 0,
+        0, 1, 0, 0,
+        Math.sin(rad), 0, Math.cos(rad), 0,
+        0, 0, 0, 1);
+    return mat4.multiply(matrix, matrix, rotateMat);
+}
+function rotateZ(matrix, angle) {
+    let rad = toRadians(angle);
+    // return mat4.fromZRotation(matrix, rad);
+    let rotateMat = mat4.fromValues(
+        Math.cos(rad), Math.sin(rad), 0, 0,
+        -Math.sin(rad), Math.cos(rad), 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1);
+    return mat4.multiply(matrix, matrix, rotateMat);
+}
+function translate(matrix, vect) {
+    //return mat4.translate(matrix, matrix, vect);
+    let transMat = mat4.fromValues(
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        vect[0], vect[1], vect[2], 1);
+    return mat4.multiply(matrix, matrix, transMat);
+}
+function scale(matrix, scaleFactor) {
+    //return mat4.scale(matrix, matrix, vect);
+    let scaleMat = mat4.fromValues(
+        scaleFactor, 0, 0, 0,
+        0, scaleFactor, 0, 0,
+        0, 0, scaleFactor, 0,
+        0, 0, 0, 1);
+    return mat4.multiply(matrix, matrix, scaleMat);
+}
+function shear(matrix, shearFactor) {
+    let shearMat = mat4.fromValues(
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        shearFactor, 0, 1, 0,
+        0, 0, 0, 1);
+    return mat4.multiply(matrix, matrix, shearMat);
+}
+
+// Set up key events and make four Fetch calls for the resources, processing accordingly. 
 // Each one calls the init() function; this function only completes when
 // all resources are loaded
 function load() {
@@ -48,24 +113,31 @@ function load() {
     document.addEventListener('keydown', (event) => {
         const keycode = event.key;
         if (keycode == 'ArrowRight') {
-            theta += 10;
-            console.log(theta);
+            rotateZ(modelMatrix, -5);
         }
         else if(keycode == 'ArrowLeft') {
-            theta -= 10;
-            console.log(theta);
+            rotateZ(modelMatrix, 5);
         }
         else if (keycode == 'ArrowUp') {
-            ydisplacement -= 10;
-            console.log(ydisplacement);
+            mat4.translate(modelMatrix, modelMatrix, [0, -10, 0]);
         }
         else if(keycode == 'ArrowDown') {
-            ydisplacement += 10;
-            console.log(ydisplacement);
+            mat4.translate(modelMatrix, modelMatrix, [0, +10, 0]);
         }
         else if (keycode == 'p') {
-            useOrtho = useOrtho ? false : true;
-            console.log(useOrtho);
+            useOrtho = !useOrtho;
+            // console.log(useOrtho);
+        }
+        else if (keycode == 's') {
+            // mat4.invert(modelMatrix, modelMatrix);
+            shearFactor += 0.1;
+            // mat4.invert(modelMatrix, modelMatrix);
+        }
+        else if (keycode == 'd') {
+            // mat4.invert(modelMatrix, modelMatrix);
+            // shear(viewMatrix, -0.1);
+            // mat4.invert(modelMatrix, modelMatrix);
+            shearFactor -= 0.1;
         }
     });
     
@@ -106,10 +178,6 @@ function load() {
     });
 }
 
-function getDisplacement() {
-    return [xdisplacement, ydisplacement, zdisplacement];
-}
-
 function getAngle() {
     return theta;
 }
@@ -119,13 +187,65 @@ function getProjection() {
 }
 
 function getModelMatrix() {
+    // modelMatrix = mat4.create();
+    // mat4.translate(modelMatrix, modelMatrix, positionOffset);
+    // // modelMatrix = translate(modelMatrix, positionOffset);
+    // rotateX(modelMatrix, -45.0);
+    // rotateY(modelMatrix, 0.0);
+    // rotateZ(modelMatrix, -45.0);
+    // mat4.scale(modelMatrix, modelMatrix, vec3.fromValues(1/150, 1/150, 1/150));
+    // // modelMatrix = scale(modelMatrix, 1/150);
     return modelMatrix;
 }
 
+function getViewMatrix() {
+    return viewMatrix;
+}
+
+function getShearMatrix() {
+    shearMatrix = mat4.create();
+    shear(shearMatrix, shearFactor);
+    return shearMatrix;
+}
+
+function getOrthoMatrix() {
+    let orthoMatrix = mat4.create();
+    const right = window.innerWidth / 2;
+    const left = -window.innerWidth / 2;
+    const top = -window.innerHeight / 2;
+    const bottom = window.innerHeight / 2;
+
+    // const right = window.innerWidth;
+    // const left = 0;
+    // const top = window.innerHeight;
+    // const bottom = 0;
+    const near = 0.1;
+    const far = 100.0;
+    mat4.ortho(orthoMatrix, left, right, bottom, top, near, far);
+    return orthoMatrix;
+}
 
 // The intialization function. Checks for all resources before continuing
-function init()
-{
+function init() {
+    modelMatrix = mat4.create();
+    viewMatrix = mat4.create();
+    mat4.translate(modelMatrix, modelMatrix, positionOffset);
+
+    // mat4.translate(modelMatrix, modelMatrix, positionOffset2);
+    // shear(modelMatrix, 1);
+    // mat4.translate(modelMatrix, modelMatrix, positionOffset);
+    rotateX(modelMatrix, -45.0);
+    rotateY(modelMatrix, 0.0);
+    rotateZ(modelMatrix, theta);
+    
+    // mat4.scale(modelMatrix, modelMatrix, vec3.fromValues(1/150, 1/150, 1/150));
+    modelMatrix = scale(modelMatrix, 1/150);
+    
+    // view
+    // console.log(modelMatrix);
+    // console.log(viewMatrix);
+
+
     // Is everything loaded?
     if(vertexSource === undefined 
         || fragmentSource === undefined 
@@ -158,8 +278,10 @@ function init()
         uniforms: {
             viewport: ({viewportWidth, viewportHeight}) => [viewportWidth, viewportHeight],
             rotation: (context, props) => props.rotation,
-            movement: (context, props) => props.movement,
-            uModelMatrix: (context, props) => modelMatrix,
+            uModelMatrix: (context, props) => props.modelMatrix,
+            uViewMatrix: (context, props) => props.viewMatrix,
+            uOrthoMatrix: (context, props) => props.orthoMatrix,
+            uShearMatrix: (context, props) => props.shearMatrix,
             color: (context, props) => props.color,
             carAngle: (context, props) => props.carAngle,
             useOrtho: (context, props) => props.useOrtho
@@ -189,8 +311,10 @@ function init()
                 count: (max - min) * 3,
                 offset: min * 3,
                 modelMatrix: getModelMatrix(),
-                movement: getDisplacement(),
                 rotation: tick,
+                viewMatrix: getViewMatrix(),
+                orthoMatrix: getOrthoMatrix(),
+                shearMatrix: getShearMatrix(),
                 useOrtho: getProjection()
             });
         }
