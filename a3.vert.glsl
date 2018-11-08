@@ -2,30 +2,23 @@
 
 precision mediump float;
 
-// TODO: Add attributes and uniforms here
+// attributes and uniforms here
 attribute vec3 position;
 
 uniform vec3 color;
 uniform ivec2 viewport;
-uniform float rotation;
-uniform float carAngle;
 uniform bool useOrtho;
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uOrthoMatrix;
 uniform mat4 uShearMatrix;
 
-// uniform mat4 uModelViewMatrix;
-// uniform mat4 uProjectionMatrix;
-
 varying vec3 vFragColor;
-
-const vec3 positionOffset = vec3(0, 0, -5.0);
-const float miniScale = 1.0/150.0;
-
 
 const float f = 1.0 / tan(radians(45.0) / 2.0);
 
+// unused matrix transform functions
+// these were reimplemented in the javascript so that they could be debugged
 mat4 rotX(float angle) {
     angle = radians(angle);
     return mat4(1, 0, 0, 0,
@@ -69,14 +62,10 @@ mat4 proj() {
     float aspect = float(viewport.x) / float(viewport.y);
     float far = 100.0, near = 0.1;
 
-    // float left = -float(viewport.x) / 2.0;
-    // float right = float(viewport.x) / 2.0;
-    // float bottom = -float(viewport.y) / 2.0;
-    // float top = float(viewport.y) / 2.0;
-    float left = -20.0;
-    float right = 20.0;
-    float bottom = -20.0;
-    float top = 20.0;
+    float left = -float(viewport.x) / 2.0;
+    float right = float(viewport.x) / 2.0;
+    float bottom = -float(viewport.y) / 2.0;
+    float top = float(viewport.y) / 2.0;
 
     // perspective
     return mat4(f / aspect, 0, 0, 0,
@@ -84,7 +73,7 @@ mat4 proj() {
             0, 0, (far + near) / (near - far), -1,
             0, 0, 2.0 * far * near / (near - far), 0);
     
-    // orthographic
+    // orthographic (have yet to implement properly)
     /*else
         return mat4(
             2.0 / (right - left), 0, 0, 0,
@@ -94,26 +83,17 @@ mat4 proj() {
 }
 
 void main(void) {
-    // TODO: Compute position for gl_Position and other varyings
-
-    mat4 rotateX = rotX(-45.0);
-    mat4 rotateY = rotY(0.0);
-    //mat4 rotateZ = rotZ(-45.0);
-    mat4 rotateZ = rotZ(carAngle);
+    // compute position for gl_Position and other varyings
 
     mat4 uProjectionMatrix;
-
     if (!useOrtho) {
         uProjectionMatrix = proj();
     }
+    // unused logic for switching between projections
     if (useOrtho) {
         uProjectionMatrix = uOrthoMatrix;
     }
     
-    mat4 uModelViewMatrix = trans(positionOffset) * rotateX * rotateY * rotateZ * scale(miniScale);
-
-    //position = vec4(position + miniTranslate, 1.0);
-
     gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * uShearMatrix * vec4(position, 1.0);
     vFragColor = color;
 }

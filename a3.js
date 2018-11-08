@@ -1,6 +1,11 @@
 // A3 Vertex Processing Code
 // Parts for students complete are maked by TODO; the rest is pre-processing
 
+// Original by TJ Jankun-Kelly
+// Modified by Jack Fletcher
+// Computer Graphics
+// Assignment #2
+// 10/14/18
 // http-server -a localhost -p 80 --cors
 
 // Load regl module into fullsize element on the page
@@ -28,23 +33,22 @@ let geometry = undefined;
 //              (the textures are not provided in this assignment).
 let materials = undefined;
 
-const INT8_SIZE = Int8Array.BYTES_PER_ELEMENT;
+// const INT8_SIZE = Int8Array.BYTES_PER_ELEMENT;   // use with cube geometry
 const INT16_SIZE = Int16Array.BYTES_PER_ELEMENT;
 const FLOAT32_SIZE = Float32Array.BYTES_PER_ELEMENT;
 
-let i = true;
 
 let theta = -45.0;
 let useOrtho = false;
-let isSheared = false;
+let positionOffset = vec3.fromValues(0, 0, -10);
+
 let modelMatrix = mat4.create();
-let positionOffset = vec3.fromValues(0, 0, -6);
-// TODO shearMatrix
 let shearMatrix = mat4.create();
 let viewMatrix = mat4.create();
 
 let shearFactor = 0;
 
+// matrix transforms and other utilities
 function toRadians(angle) {
     return angle * (Math.PI / 180);
 }
@@ -125,18 +129,14 @@ function load() {
             mat4.translate(modelMatrix, modelMatrix, [0, +10, 0]);
         }
         else if (keycode == 'p') {
+            // WARNING orthographic projection doesn't work yet so pls don't try
             useOrtho = !useOrtho;
             // console.log(useOrtho);
         }
         else if (keycode == 's') {
-            // mat4.invert(modelMatrix, modelMatrix);
             shearFactor += 0.1;
-            // mat4.invert(modelMatrix, modelMatrix);
         }
         else if (keycode == 'd') {
-            // mat4.invert(modelMatrix, modelMatrix);
-            // shear(viewMatrix, -0.1);
-            // mat4.invert(modelMatrix, modelMatrix);
             shearFactor -= 0.1;
         }
     });
@@ -187,14 +187,6 @@ function getProjection() {
 }
 
 function getModelMatrix() {
-    // modelMatrix = mat4.create();
-    // mat4.translate(modelMatrix, modelMatrix, positionOffset);
-    // // modelMatrix = translate(modelMatrix, positionOffset);
-    // rotateX(modelMatrix, -45.0);
-    // rotateY(modelMatrix, 0.0);
-    // rotateZ(modelMatrix, -45.0);
-    // mat4.scale(modelMatrix, modelMatrix, vec3.fromValues(1/150, 1/150, 1/150));
-    // // modelMatrix = scale(modelMatrix, 1/150);
     return modelMatrix;
 }
 
@@ -209,6 +201,7 @@ function getShearMatrix() {
 }
 
 function getOrthoMatrix() {
+    // WARNING this doesn't work yet so don't try it
     let orthoMatrix = mat4.create();
     const right = window.innerWidth / 2;
     const left = -window.innerWidth / 2;
@@ -229,23 +222,18 @@ function getOrthoMatrix() {
 function init() {
     modelMatrix = mat4.create();
     viewMatrix = mat4.create();
+
+    // move scene to proper viewing distance
     mat4.translate(modelMatrix, modelMatrix, positionOffset);
 
-    // mat4.translate(modelMatrix, modelMatrix, positionOffset2);
-    // shear(modelMatrix, 1);
-    // mat4.translate(modelMatrix, modelMatrix, positionOffset);
+    // orient scene to a corner angle
     rotateX(modelMatrix, -45.0);
     rotateY(modelMatrix, 0.0);
     rotateZ(modelMatrix, theta);
     
-    // mat4.scale(modelMatrix, modelMatrix, vec3.fromValues(1/150, 1/150, 1/150));
+    // scale to viewable size
     modelMatrix = scale(modelMatrix, 1/150);
     
-    // view
-    // console.log(modelMatrix);
-    // console.log(viewMatrix);
-
-
     // Is everything loaded?
     if(vertexSource === undefined 
         || fragmentSource === undefined 
@@ -253,12 +241,11 @@ function init() {
         || materials === undefined)
         return;
 
-    // TODO: Create your regl draw function(s). Then create a regl.frame 
+    // TODONE: Create your regl draw function(s). Then create a regl.frame 
     // function for the animation callback that calls your draw
     // function(s). 
 
     drawMini = regl({
-        // TODO
         // fragment shader
         frag: fragmentSource,
         
@@ -283,10 +270,7 @@ function init() {
             uOrthoMatrix: (context, props) => props.orthoMatrix,
             uShearMatrix: (context, props) => props.shearMatrix,
             color: (context, props) => props.color,
-            carAngle: (context, props) => props.carAngle,
             useOrtho: (context, props) => props.useOrtho
-            // uModelViewMatrix: regl.prop('uModelViewMatrix'),
-            // uProjectionMatrix: regl.prop('uProjectionMatrix'),
         },
         
         // elements to draw
@@ -299,6 +283,7 @@ function init() {
         if(drawMini === undefined)
             return;
 
+        // loop through group names to match triangles with corresponding render color
         for (let i = 0; i < Object.keys(geometry.groups).length; ++i) {
             let groupName = Object.keys(geometry.groups)[i];
             let min = geometry.groups[groupName][0];
@@ -306,14 +291,13 @@ function init() {
             let color = materials[groupName]["color"];
             // multiplying count and offset by 3 because triangles take 3 points
             drawMini({
-                carAngle: getAngle(),
                 color: color,
                 count: (max - min) * 3,
                 offset: min * 3,
                 modelMatrix: getModelMatrix(),
                 rotation: tick,
                 viewMatrix: getViewMatrix(),
-                orthoMatrix: getOrthoMatrix(),
+                orthoMatrix: getOrthoMatrix(), // not properly implemented
                 shearMatrix: getShearMatrix(),
                 useOrtho: getProjection()
             });
