@@ -141,11 +141,27 @@ function load() {
             useOrtho = !useOrtho;
             // console.log(useOrtho);
         }
-        else if (keycode == 's') {
+        else if (keycode == 'x') {
             shearFactor += 0.1;
         }
-        else if (keycode == 'd') {
+        else if (keycode == 'c') {
             shearFactor -= 0.1;
+        }
+        else if (keycode == 'a') {
+            // Toggle ambient light
+            useAmbient = !useAmbient;
+        }
+        else if (keycode == 'd') {
+            // Toggle diffuse light
+            useDiffuse = !useDiffuse;
+        }
+        else if (keycode == 's') {
+            // Toggle specular light
+            useSpecular = !useSpecular;
+        }
+        else if (keycode == 'f') {
+            // Toggle flat shading
+            useFlat = !useFlat;
         }
     });
     
