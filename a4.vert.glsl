@@ -4,6 +4,7 @@ precision mediump float;
 
 // attributes and uniforms here
 attribute vec3 position;
+attribute vec3 normal;
 
 uniform vec3 color;
 uniform ivec2 viewport;
@@ -13,7 +14,9 @@ uniform mat4 uViewMatrix;
 uniform mat4 uOrthoMatrix;
 uniform mat4 uShearMatrix;
 
-varying vec3 vFragColor;
+varying vec3 fragColor;
+varying vec3 eyeNormal;
+varying vec3 eyeView;
 
 const float f = 1.0 / tan(radians(45.0) / 2.0);
 
@@ -93,7 +96,9 @@ void main(void) {
     if (useOrtho) {
         uProjectionMatrix = uOrthoMatrix;
     }
-    
+    mat4 modelView = uViewMatrix * uModelMatrix * uShearMatrix;
     gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * uShearMatrix * vec4(position, 1.0);
-    vFragColor = color;
+    eyeView = -normalize(modelView * vec4(position, 1.0)).xyz;
+    eyeNormal = normalize(modelView * vec4(normal, 0.0)).xyz;
+    fragColor = color;
 }

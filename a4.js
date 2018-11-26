@@ -282,19 +282,29 @@ function init() {
                 buffer: regl.buffer(new Float32Array(geometry.vertexdata)),
                 size: 3,
                 stride: 8 * FLOAT32_SIZE
+            },
+            normal: {
+                buffer: regl.buffer(new Float32Array(geometry.vertexdata)),
+                size: 3,
+                stride: 8 * FLOAT32_SIZE,
+                offset: 3 * FLOAT32_SIZE
             }
         },
         
         // uniforms
         uniforms: {
             viewport: ({viewportWidth, viewportHeight}) => [viewportWidth, viewportHeight],
-            rotation: (context, props) => props.rotation,
-            uModelMatrix: (context, props) => props.modelMatrix,
-            uViewMatrix: (context, props) => props.viewMatrix,
-            uOrthoMatrix: (context, props) => props.orthoMatrix,
-            uShearMatrix: (context, props) => props.shearMatrix,
-            color: (context, props) => props.color,
-            useOrtho: (context, props) => props.useOrtho
+            rotation: (context, {rotation}) => rotation,
+            uModelMatrix: (context, {modelMatrix}) => modelMatrix,
+            uViewMatrix: (context, {viewMatrix}) => viewMatrix,
+            uOrthoMatrix: (context, {orthoMatrix}) => orthoMatrix,
+            uShearMatrix: (context, {shearMatrix}) => shearMatrix,
+            color: (context, {color}) => color,
+            useOrtho: (context, {useOrtho}) => useOrtho,
+            useFlat: (context, {useFlat}) => useFlat,
+            useAmbient: (context, {useAmbient}) => useAmbient,
+            useDiffuse: (context, {useDiffuse}) => useDiffuse,
+            useSpecular: (context, {useSpecular}) => useSpecular
         },
         
         // elements to draw
@@ -323,7 +333,11 @@ function init() {
                 viewMatrix: getViewMatrix(),
                 orthoMatrix: getOrthoMatrix(), // not properly implemented
                 shearMatrix: getShearMatrix(),
-                useOrtho: getProjection()
+                useOrtho: getProjection(),
+                useFlat,
+                useAmbient,
+                useDiffuse,
+                useSpecular
             });
         }
         
