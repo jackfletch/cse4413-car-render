@@ -55,6 +55,7 @@ let useDiffuse = false;
 let useSpecular = false;
 let useTone = false;
 let useDepth = false;
+let useBlackBackground = false;
 
 // values for texturing
 let useTexture = false;
@@ -171,6 +172,10 @@ function load() {
         else if (keycode == 't') {
             // Toggle texture
             useTexture = !useTexture;
+        }
+        else if (keycode == 'b') {
+            // Toggle background color
+            useBlackBackground = !useBlackBackground;
         }
     });
     
@@ -346,12 +351,13 @@ function init() {
         if(drawMini === undefined)
             return;
 
-        // clear the buffer
-        regl.clear({
-            // background color (black)
-            color: [0, 0, 0, 1],
-            depth: 1,
-        });
+        if (useBlackBackground) {
+            regl.clear({
+                // background color (black)
+                color: [0, 0, 0, 1],
+                depth: 1,
+            });
+        }
 
         // loop through group names to match triangles with corresponding render color
         for (let i = 0; i < Object.keys(geometry.groups).length; ++i) {
