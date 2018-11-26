@@ -1,4 +1,4 @@
-// A3 MINI fragment shader
+// A4 MINI fragment shader
 
 precision mediump float;
 

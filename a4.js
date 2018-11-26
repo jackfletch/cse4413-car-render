@@ -1,11 +1,11 @@
-// A3 Vertex Processing Code
+// A4 Vertex Processing Code
 // Parts for students complete are maked by TODO; the rest is pre-processing
 
 // Original by TJ Jankun-Kelly
 // Modified by Jack Fletcher
 // Computer Graphics
-// Assignment #2
-// 10/14/18
+// Assignment #4
+// 11/26/18
 // http-server -a localhost -p 80 --cors
 
 // Load regl module into fullsize element on the page
@@ -141,7 +141,7 @@ function load() {
         }
     });
     
-    fetch('a3.vert.glsl')
+    fetch('a4.vert.glsl')
     .then(function(response) {
         return response.text();
     })
@@ -150,7 +150,7 @@ function load() {
         init();
     });
 
-    fetch('a3.frag.glsl')
+    fetch('a4.frag.glsl')
     .then(function(response) {
         return response.text();
     })

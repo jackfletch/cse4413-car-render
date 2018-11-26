@@ -1,4 +1,4 @@
-// A3 MINI vertex shader
+// A4 MINI vertex shader
 
 precision mediump float;
 
