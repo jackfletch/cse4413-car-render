@@ -346,6 +346,13 @@ function init() {
         if(drawMini === undefined)
             return;
 
+        // clear the buffer
+        regl.clear({
+            // background color (black)
+            color: [0, 0, 0, 1],
+            depth: 1,
+        });
+
         // loop through group names to match triangles with corresponding render color
         for (let i = 0; i < Object.keys(geometry.groups).length; ++i) {
             let groupName = Object.keys(geometry.groups)[i];
