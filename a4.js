@@ -48,6 +48,14 @@ let viewMatrix = mat4.create();
 
 let shearFactor = 0;
 
+// values for the lighting parameters
+let useFlat = true;
+let useAmbient = false;
+let useDiffuse = false;
+let useSpecular = false;
+let useTone = false;
+let useDepth = false;
+
 // matrix transforms and other utilities
 function toRadians(angle) {
     return angle * (Math.PI / 180);
