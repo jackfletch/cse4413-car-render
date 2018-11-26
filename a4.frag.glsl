@@ -8,10 +8,14 @@ uniform bool useFlat;
 uniform bool useAmbient;
 uniform bool useDiffuse;
 uniform bool useSpecular;
+uniform bool useTexture;
+
+uniform sampler2D miniTexture;
 
 varying vec3 fragColor;
 varying vec3 eyeNormal;
 varying vec3 eyeView;
+varying vec2 fragTexturePosition;
 
 // Constants
 // Light parameters
@@ -19,7 +23,12 @@ const vec3 eyeLight = normalize(vec3(3, 1, 1));
 
 void main() {
     vec3 color, specColor, tmpColor;
-    color = fragColor, 1;
+    if (useTexture)
+        color = texture2D(miniTexture, fragTexturePosition).xyz;
+    else
+        color = vec3(fragColor);
+
+    // color = fragColor, 1;
     specColor = vec3(1, 1, 1);
 
     // per fragment Phong lighting

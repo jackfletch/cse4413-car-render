@@ -5,6 +5,7 @@ precision mediump float;
 // attributes and uniforms here
 attribute vec3 position;
 attribute vec3 normal;
+attribute vec2 texturePosition;
 
 uniform vec3 color;
 uniform ivec2 viewport;
@@ -17,6 +18,7 @@ uniform mat4 uShearMatrix;
 varying vec3 fragColor;
 varying vec3 eyeNormal;
 varying vec3 eyeView;
+varying vec2 fragTexturePosition;
 
 const float f = 1.0 / tan(radians(45.0) / 2.0);
 
@@ -101,4 +103,5 @@ void main(void) {
     eyeView = -normalize(modelView * vec4(position, 1.0)).xyz;
     eyeNormal = normalize(modelView * vec4(normal, 0.0)).xyz;
     fragColor = color;
+    fragTexturePosition = texturePosition;
 }

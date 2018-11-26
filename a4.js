@@ -56,6 +56,11 @@ let useSpecular = false;
 let useTone = false;
 let useDepth = false;
 
+// values for texturing
+let useTexture = false;
+const miniImage = new Image();
+let miniLoaded = false;
+
 // matrix transforms and other utilities
 function toRadians(angle) {
     return angle * (Math.PI / 180);
@@ -163,6 +168,10 @@ function load() {
             // Toggle flat shading
             useFlat = !useFlat;
         }
+        else if (keycode == 't') {
+            // Toggle texture
+            useTexture = !useTexture;
+        }
     });
     
     fetch('a4.vert.glsl')
@@ -200,6 +209,13 @@ function load() {
         materials = obj;
         init();
     });
+
+    miniImage.src = 'mini-diffuse.png';
+    miniImage.onload = function()
+    {
+        miniLoaded = true;
+        init();
+    }
 }
 
 function getAngle() {
@@ -262,8 +278,13 @@ function init() {
     if(vertexSource === undefined 
         || fragmentSource === undefined 
         || geometry === undefined
-        || materials === undefined)
+        || materials === undefined
+        || !miniLoaded) {
         return;
+    }
+
+    // Create and bind the textures
+    const miniTexture = regl.texture(miniImage);
 
     // TODONE: Create your regl draw function(s). Then create a regl.frame 
     // function for the animation callback that calls your draw
@@ -288,6 +309,12 @@ function init() {
                 size: 3,
                 stride: 8 * FLOAT32_SIZE,
                 offset: 3 * FLOAT32_SIZE
+            },
+            texturePosition: {
+                buffer: regl.buffer(new Float32Array(geometry.vertexdata)),
+                size: 2,
+                stride: 8 * FLOAT32_SIZE,
+                offset: 6 * FLOAT32_SIZE
             }
         },
         
@@ -304,7 +331,9 @@ function init() {
             useFlat: (context, {useFlat}) => useFlat,
             useAmbient: (context, {useAmbient}) => useAmbient,
             useDiffuse: (context, {useDiffuse}) => useDiffuse,
-            useSpecular: (context, {useSpecular}) => useSpecular
+            useSpecular: (context, {useSpecular}) => useSpecular,
+            useTexture: (context, {useTexture}) => useTexture,
+            miniTexture: miniTexture
         },
         
         // elements to draw
@@ -323,6 +352,7 @@ function init() {
             let min = geometry.groups[groupName][0];
             let max = geometry.groups[groupName][1];
             let color = materials[groupName]["color"];
+            let isGroupTextured = materials[groupName]["diffuse"] === "mini_body_diffuse.png";
             // multiplying count and offset by 3 because triangles take 3 points
             drawMini({
                 color: color,
@@ -337,7 +367,8 @@ function init() {
                 useFlat,
                 useAmbient,
                 useDiffuse,
-                useSpecular
+                useSpecular,
+                useTexture: isGroupTextured && useTexture
             });
         }
         
