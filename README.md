@@ -2,7 +2,7 @@
 
 This project is from assignments 3 and 4 of a computer graphics class (CSE 4413) at Mississippi State University.
 
-To run, serve `src/a4.html` as a static file.
+To run, serve `src/a4.html` as a static file or build a docker image using the Dockerfile.
 
 ![rendered-car]
 
